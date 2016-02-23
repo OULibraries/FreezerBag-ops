@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
-LOGFILE="/var/log/freezerbag.log"
 
 ## Require arguments
 if [ ! -z "$1" ]
@@ -47,6 +45,11 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   do
     ## Get the bag name
     BAGNAME=$(basename "$BAGPATH")
+
+    ## Set a bag-specific logfile
+    LOGFILE=/tmp/`basename "$0"`.${BAGNAME}.log
+
+    ## Get the time
     NOW=`date`
     echo "$BAGNAME - start $NOW" > ${LOGFILE} 2>&1
     ## Execute the freezerbag script with appropriate options
