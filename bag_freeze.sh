@@ -16,7 +16,7 @@ if [ ! -z "$2" ]
 then
   VAULT=$2
 else
-  echo "Requires bagit dest dir (eg. /mnt/bagitout) as argument"
+  echo "Requires bagit dest vault (eg. glaciervaultname) as argument"
   exit 1;
 fi
 
