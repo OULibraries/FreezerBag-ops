@@ -48,18 +48,18 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   
     ## Make a named pipe to hold the email contents.
     ## We\'re going to the trouble for cron compatibility
-    MYPIPE=/tmp/`basename "$0"`.pipe
+    BAGPIPE=/tmp/${BAGNAME}.pipe
     ## Kill the pipe on exit
-    trap "rm -f ${MYPIPE}" EXIT
+    trap "rm -f ${BAGPIPE}" EXIT
   
-    ## Crete the pipe on start
-    if [[ ! -p $MYPIPE ]]; then
-      mkfifo $MYPIPE
+    ## Create the pipe on start
+    if [[ ! -p $BAGPIPE ]]; then
+      mkfifo $BAGPIPE
     fi
   
     ## Attach a file descriptor.
     ## This causes the shell to buffer the pipe so we don\'t worry about blocking
-    exec 3<>$MYPIPE
+    exec 3<>$BAGPIPE
 
     BAGPATH=${INBAGSDIR}/${BAGNAME}
     echo $TODAY>&3
