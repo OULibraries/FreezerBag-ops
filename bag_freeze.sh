@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+## Number of subshells to spawn
+SUBSHELL_COUNT=4
+
 ## Require arguments
 if [ ! -z "$1" ]
 then
@@ -43,21 +46,27 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   ## Loop through the bags
   for BAGPATH in `find $BAGSDIR -mindepth 1 -maxdepth 1 -type d`
   do
-    ## Get the bag name
-    BAGNAME=$(basename "$BAGPATH")
+    ##
+    ((i=i%SUBSHELL_COUNT)); ((i++==0)) && wait
 
-    ## Set a bag-specific logfile
-    LOGFILE=/tmp/`basename "$0"`.${BAGNAME}.log
+    ## Treat the following as one lump
+    (
+      ## Get the bag name
+      BAGNAME=$(basename "$BAGPATH")
 
-    ## Get the time
-    NOW=`date`
-    echo "$BAGNAME - start $NOW" > ${LOGFILE} 2>&1
-    ## Execute the freezerbag script with appropriate options
-    ## Send the output to our logfile
-    python /opt/ltp/freezerbag.py --freeze --bag ${BAGNAME} --path ${BAGSDIR} --vault ${VAULT} >> ${LOGFILE} 2>&1
-    NOW=`date`
-    echo "$BAGNAME - completed $NOW" >> ${LOGFILE} 2>&1
-    ## Send one email for each bag
-    mail -s "Freezerbag $BAGNAME - $NOW" $MAILCC $MAILTO < $LOGFILE
+      ## Set a bag-specific logfile
+      LOGFILE=/tmp/`basename "$0"`.${BAGNAME}.log
+
+      ## Get the time
+      NOW=`date`
+      echo "$BAGNAME - start $NOW" > ${LOGFILE} 2>&1
+      ## Execute the freezerbag script with appropriate options
+      ## Send the output to our logfile
+      python /opt/ltp/freezerbag.py --freeze --bag ${BAGNAME} --path ${BAGSDIR} --vault ${VAULT} >> ${LOGFILE} 2>&1
+      NOW=`date`
+      echo "$BAGNAME - completed $NOW" >> ${LOGFILE} 2>&1
+      ## Send one email for each bag
+      mail -s "Freezerbag $BAGNAME - $NOW" $MAILCC $MAILTO < $LOGFILE
+    ) &
   done
 ) 200>${MYFLOCK}
