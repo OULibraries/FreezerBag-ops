@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 LOGFILE="/var/log/freezerbag.log"
-TODAY=`date`
 
 ## Require arguments
 if [ ! -z "$1" ]
@@ -48,12 +47,14 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   do
     ## Get the bag name
     BAGNAME=$(basename "$BAGPATH")
-    echo "$BAGNAME - start $TODAY" > ${LOGFILE} 2>&1
+    NOW=`date`
+    echo "$BAGNAME - start $NOW" > ${LOGFILE} 2>&1
     ## Execute the freezerbag script with appropriate options
     ## Send the output to our logfile
     python /opt/ltp/freezerbag.py --freeze --bag ${BAGNAME} --path ${BAGSDIR} --vault ${VAULT} >> ${LOGFILE} 2>&1
-    echo "$BAGNAME - completed $TODAY" >> ${LOGFILE} 2>&1
+    NOW=`date`
+    echo "$BAGNAME - completed $NOW" >> ${LOGFILE} 2>&1
     ## Send one email for each bag
-    mail -s "Freezerbag $BAGNAME - $TODAY" $MAILCC $MAILTO < $LOGFILE
+    mail -s "Freezerbag $BAGNAME - $NOW" $MAILCC $MAILTO < $LOGFILE
   done
 ) 200>${MYFLOCK}
