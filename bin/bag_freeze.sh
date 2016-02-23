@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## Number of subshells to spawn
-SUBSHELL_COUNT=4
+SUBSHELL_COUNT=8
 
 ## Require arguments
 if [ ! -z "$1" ]
