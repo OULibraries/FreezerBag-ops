@@ -22,7 +22,9 @@ Syncs valid bags from one dir to another. Emails per-bag results.
 bag_rsync.sh srcbagdir destbagdir/ email@example.com ccemail@example.com
 ```
 
-### Pushes bags to aws glacier.  Emails per-bag results.
+### bag_freeze
+Pushes bags to aws glacier.  Emails per-bag results.
+
 ```
 bag_freeze.sh srcbagdir destglaciervault email@example.com ccemail@example.com
 ```
