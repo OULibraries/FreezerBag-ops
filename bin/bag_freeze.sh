@@ -46,7 +46,8 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   ## Loop through the bags
   for BAGPATH in `find $BAGSDIR -mindepth 1 -maxdepth 1 -type d`
   do
-    ##
+    ## Fire off the specified number of subshells.
+    ## Repeat after they all complete. A simple way to go wide, but not the most efficient.
     ((i=i%SUBSHELL_COUNT)); ((i++==0)) && wait
 
     ## Treat the following as one lump
