@@ -40,29 +40,30 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   for BAGNAME in `diff -sq ${INBAGSDIR} ${OUTBAGSDIR} | grep "Only in ${INBAGSDIR}" | cut -d ':' -f 2 | xargs`
   do
 
-    ## Get the date
-    TODAY=`date`
-  
     ## Holds our email message body
     BODY=''
   
     ## Make a named pipe to hold the email contents.
     ## We\'re going to the trouble for cron compatibility
-    MYPIPE=/tmp/`basename "$0"`.pipe
+    BAGPIPE=/tmp/`basename "$0"`.${BAGNAME}.pipe
     ## Kill the pipe on exit
-    trap "rm -f ${MYPIPE}" EXIT
+    trap "rm -f ${BAGPIPE}" EXIT
   
-    ## Crete the pipe on start
-    if [[ ! -p $MYPIPE ]]; then
-      mkfifo $MYPIPE
+    ## Create the pipe on start
+    if [[ ! -p $BAGPIPE ]]; then
+      mkfifo $BAGPIPE
     fi
   
     ## Attach a file descriptor.
     ## This causes the shell to buffer the pipe so we don\'t worry about blocking
-    exec 3<>$MYPIPE
+    exec 3<>$BAGPIPE
 
     BAGPATH=${INBAGSDIR}/${BAGNAME}
-    echo $TODAY>&3
+
+    ## Get the time
+    NOW=`date`
+  
+    echo $NOW>&3
 
     ## Skip this folder if it isn\'t a valid bag
     bagit.py --validate $BAGPATH 2>&3
@@ -78,7 +79,11 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
         ## Append body
         BODY=${BODY}$'\n'${LINE}
       done
-      echo "$BODY" | mail -s "Bag invalid: $BAGNAME $TODAY" $MAILCC $MAILTO; continue
+
+      ## Get the time
+      NOW=`date`
+  
+      echo "$BODY" | mail -s "Bag invalid: $BAGNAME $NOW" $MAILCC $MAILTO; continue
     else
       ## If it is a valid bag, sync it.
       ## Don\'t keep permissions from source, as they are irrelevant to the file archive
@@ -94,7 +99,11 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
         ## Append body
         BODY=${BODY}$'\n'${LINE}
       done
-      echo "$BODY" | mail -s "Bag rsync: $BAGNAME $TODAY" $MAILCC $MAILTO
+
+      ## Get the time
+      NOW=`date`
+  
+      echo "$BODY" | mail -s "Bag rsync: $BAGNAME $NOW" $MAILCC $MAILTO
     fi
   done
 ) 200>$MYFLOCK
