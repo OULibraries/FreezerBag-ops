@@ -37,7 +37,7 @@ fi
 MYFLOCK=/var/lock/`basename "$0"`.lock
 (
   flock -x -w 10 200 || exit 1
-  for BAGNAME in `diff -sq ${INBAGSDIR} ${OUTBAGSDIR} | grep "Only in ${INBAGSDIR}" | cut -d ':' -f 2 | xargs`
+  for BAGNAME in `diff -sq ${INBAGSDIR} ${OUTBAGSDIR} | grep "Only in ${INBAGSDIR}\|Common subdirectories" | cut -d ':' -f 2 | xargs`
   do
 
     ## Holds our email message body
