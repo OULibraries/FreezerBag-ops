@@ -45,7 +45,7 @@ MYFLOCK=/var/lock/`basename "$0"`.lock
   
     ## Make a named pipe to hold the email contents.
     ## We\'re going to the trouble for cron compatibility
-    BAGPIPE=/tmp/`basename "$0"`.${BAGNAME}.pipe
+    BAGPIPE=/tmp/`basename "$0"`_`basename ${BAGNAME}`.pipe
     ## Kill the pipe on exit
     trap "rm -f ${BAGPIPE}" EXIT
   
