@@ -45,7 +45,8 @@ else
   MAILCC=""
 fi
 
-SYNCOPTS="--dryrun"
+#SYNCOPTS="--dryrun"
+SYNCOPTS=""
 
 BASENAME=`basename ${SOURCE}`
 
