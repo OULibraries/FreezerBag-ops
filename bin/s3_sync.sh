@@ -19,13 +19,13 @@ fi
 
 if [[ ! -z "$3" ]]; then
   TYPE=$3
-  if [[ "$TYPE" -ne 'bag' || "$TYPE" -ne 'dir' ]]
+  if [[ "$TYPE" -ne 'bag' || "$TYPE" -ne 'any' ]]
  then
-    echo "Requires type of bag or dir."
+    echo "Requires type of bag or any."
     exit 1;
   fi
 else
-  echo "Requires type of bag or dir."
+  echo "Requires type of bag or any."
   exit 1;
 fi
 
@@ -92,10 +92,11 @@ trap finish EXIT
 
   # If you were running this against bags, you might want this.  
   if [[ "$TYPE" == "bag" ]]; then
-    bagit.py --validate $SOURCE 2>&3
+    ## Check for bagname/bagit.txt. If that exists, then validate the bag.
+    stat --format=%F:\ %n $SOURCE/bagit.txt >&3 2>&3 && bagit.py --validate $SOURCE 2>&3
     SOURCESTATUS="$?"
   # Is there something there?
-  elif [[ "$TYPE" == "dir" ]]; then
+  elif [[ "$TYPE" == "any" ]]; then
     stat --format=%F:\ %n $SOURCE >&3 2>&3
     SOURCESTATUS="$?"
   fi
