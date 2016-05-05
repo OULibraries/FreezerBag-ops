@@ -79,3 +79,10 @@ FLOCK=/var/lock/`basename "$0"`.lock
     ) &
   done
 ) 200>${FLOCK}
+
+function finish {
+  # Kill the lock on exit
+  rm $FLOCK
+}
+
+trap finish EXIT
