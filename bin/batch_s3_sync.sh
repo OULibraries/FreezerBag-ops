@@ -8,7 +8,7 @@ if [ ! -z "$1" ]
 then
   SOURCES=$1
 else
-  echo "Requires LocalPath as source. Should be a directory full of dirs or bags."
+  echo "Requires LocalPath as source."
   exit 1;
 fi
 
@@ -22,13 +22,13 @@ fi
 
 if [[ ! -z "$3" ]]; then
   TYPE=$3
-  if [[ "$TYPE" -ne 'bag' || "$TYPE" -ne 'dir' ]]
+  if [[ "$TYPE" -ne 'bag' || "$TYPE" -ne 'any' ]]
  then
-    echo "Requires type of bag or dir."
+    echo "Requires type of bag or any."
     exit 1;
   fi
 else
-  echo "Requires type of bag or dir."
+  echo "Requires type of bag or any."
   exit 1;
 fi
 
