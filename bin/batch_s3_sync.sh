@@ -63,7 +63,7 @@ FLOCK=/var/lock/`basename "$0"`.lock
   flock -x -w 10 200 || exit 1
 
   ## Loop through the sources
-  for CONTENT in `find $SOURCES -mindepth 1 -maxdepth 1 -type d`
+  for SOURCE in `find $SOURCES -mindepth 1 -maxdepth 1 -type d`
   do
     ## Fire off the specified number of subshells.
     ## Repeat after they all complete. A simple way to go wide, but not the most efficient.
@@ -71,8 +71,11 @@ FLOCK=/var/lock/`basename "$0"`.lock
 
     ## Treat the following as one lump
     (
+      ## Get the bag name
+      CONTENT=$(basename "$SOURCE")
+
       ## Execute the s3_sync script with appropriate options
-      bash -c "s3_sync.sh ${SOURCES}/${CONTENT} ${DEST}/${CONTENT} ${TYPE} ${MAILTO} ${MAILCC}"
+      bash -c "s3_sync.sh ${SOURCE}/${CONTENT} ${DEST}/${CONTENT} ${TYPE} ${MAILTO} ${MAILCC}"
     ) &
   done
 ) 200>${FLOCK}
