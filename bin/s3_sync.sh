@@ -49,9 +49,6 @@ SYNCOPTS="--dryrun"
 
 BASENAME=`basename ${SOURCE}`
 
-# Source exists. This currently only works for LocalPath sources
-if [[ -d ${SOURCE} ]] ; then
-
 # Make a lock file to prevent runs from overlapping
 FLOCK=/var/lock/${BASENAME}.lock
  
@@ -95,7 +92,7 @@ trap finish EXIT
   if [[ "$TYPE" == "bag" ]]; then
     bagit.py --validate $SOURCE 2>&3
     SOURCESTATUS="$?"
-  # This is basically a null test, since we already established this is a dir
+  # Is there something there?
   elif [[ "$TYPE" == "dir" ]]; then
     stat --format=%F:\ %n $SOURCE >&3 2>&3
     SOURCESTATUS="$?"
@@ -141,4 +138,3 @@ trap finish EXIT
     echo "$BODY" | mail -s "s3sync: $BASENAME $NOW" $MAILCC $MAILTO
   fi
 ) 200>$FLOCK
-fi
