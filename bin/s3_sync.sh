@@ -49,12 +49,14 @@ SYNCOPTS="--dryrun"
 
 BASENAME=`basename ${SOURCE}`
 
+ME=`basename "$0"`
+
 # Make a lock file to prevent runs from overlapping
-FLOCK=/var/lock/${BASENAME}.lock
+FLOCK=/var/lock/${ME}_${BASENAME}.lock
  
 # Make a named pipe to hold the email contents.
 # We go to the trouble for cron compatibility
-PIPE=/tmp/${BASENAME}.pipe
+PIPE=/tmp/${ME}_${BASENAME}.pipe
 
 function finish {
   # Kill the pipe on exit
