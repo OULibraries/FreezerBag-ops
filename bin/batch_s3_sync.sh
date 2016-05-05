@@ -75,7 +75,7 @@ FLOCK=/var/lock/`basename "$0"`.lock
       CONTENT=$(basename "$SOURCE")
 
       ## Execute the s3_sync script with appropriate options
-      bash -c "s3_sync.sh ${SOURCE}/${CONTENT} ${DEST}/${CONTENT} ${TYPE} ${MAILTO} ${MAILCC}"
+      bash -c "s3_sync.sh ${SOURCES}/${CONTENT} ${DEST}/${CONTENT} ${TYPE} ${MAILTO} ${MAILCC}"
     ) &
   done
 ) 200>${FLOCK}
