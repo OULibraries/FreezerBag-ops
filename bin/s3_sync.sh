@@ -59,6 +59,15 @@ FLOCK=/var/lock/${BASENAME}.lock
 # We go to the trouble for cron compatibility
 PIPE=/tmp/${BASENAME}.pipe
 
+function finish {
+  # Kill the pipe on exit
+  rm $PIPE
+  # Kill the lock on exit
+  rm $FLOCK
+}
+
+trap finish EXIT
+
 (
   flock -x -w 10 200 || exit 1
 
@@ -133,12 +142,3 @@ PIPE=/tmp/${BASENAME}.pipe
   fi
 ) 200>$FLOCK
 fi
-
-function finish {
-  # Kill the pipe on exit
-  rm $PIPE
-  # Kill the lock on exit
-  rm $FLOCK
-}
-
-trap finish EXIT
