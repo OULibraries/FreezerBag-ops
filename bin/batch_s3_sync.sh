@@ -6,7 +6,7 @@ SUBSHELL_COUNT=8
 # Require arguments
 if [ ! -z "$1" ]
 then
-  SOURCES=$1
+  INPUTDIR=$1
 else
   echo "Requires LocalPath as source."
   exit 1;
@@ -54,35 +54,23 @@ WD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ## Add it to path
 PATH=$PATH:$WD
 
+## Loop through the sources
+declare -a SOURCES
+while IFS= read -r -d '' SOURCE; do
+  SOURCES+=( "$SOURCE" )
+done < <(find "${INPUTDIR}" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
 
-## Make a lock file to prevent runs from overlapping
-FLOCK=/var/lock/`basename "$0"`.lock
+for SOURCE in "${SOURCES[@]}"; do
+  ## Fire off the specified number of subshells.
+  ## Repeat after they all complete. A simple way to go wide, but not the most efficient.
+  ((i=i%SUBSHELL_COUNT)); ((i++==0)) && wait
 
-## Go away if we're still running
-(
-  flock -x -w 10 200 || exit 1
+  ## Treat the following as one lump
+  (
+    ## Get the bag name
+    CONTENT=$(basename "${SOURCE}")
 
-  ## Loop through the sources
-  for SOURCE in `find $SOURCES -mindepth 1 -maxdepth 1 -type d`
-  do
-    ## Fire off the specified number of subshells.
-    ## Repeat after they all complete. A simple way to go wide, but not the most efficient.
-    ((i=i%SUBSHELL_COUNT)); ((i++==0)) && wait
-
-    ## Treat the following as one lump
-    (
-      ## Get the bag name
-      CONTENT=$(basename "$SOURCE")
-
-      ## Execute the s3_sync script with appropriate options
-      bash -c "s3_sync.sh ${SOURCES}/${CONTENT} ${DEST}/${CONTENT} ${TYPE} ${MAILTO} ${MAILCC}"
-    ) &
-  done
-) 200>${FLOCK}
-
-function finish {
-  # Kill the lock on exit
-  rm $FLOCK
-}
-
-trap finish EXIT
+    ## Execute the s3_sync script with appropriate options
+    bash -c "${WD}/s3_sync.sh \"${INPUTDIR}/${CONTENT}\" \"${DEST}/${CONTENT}\" ${TYPE} ${MAILTO} ${MAILCC}"
+  ) &
+done

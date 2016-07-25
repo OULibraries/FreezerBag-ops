@@ -1,39 +1,40 @@
 #!/usr/bin/env bash
 
 # Require arguments
-if [ ! -z "$1" ]
+if [ ! -z "${1}" ]
 then
-  SOURCE=$1
+  SOURCE="${1}"
 else
-  echo "Requires LocalPath as source."
+  echo "Requires LocalPath as source, got $@"
   exit 1;
 fi
 
-if [ ! -z "$2" ]
+if [ ! -z "${2}" ]
 then
-  DEST=$2
+  DEST="${2}"
 else
-  echo "Requires LocalPath OR S3Uri as destination."
+  echo "Requires LocalPath OR S3Uri as destination, got $@"
   exit 1;
 fi
 
-if [[ ! -z "$3" ]]; then
-  TYPE=$3
-  if [[ "$TYPE" -ne 'bag' || "$TYPE" -ne 'any' ]]
+if [[ ! -z "${3}" ]]; then
+  TYPE="${3}"
+  if [[ "${TYPE}" -ne 'bag' || "${TYPE}" -ne 'any' ]]
  then
-    echo "Requires type of bag or any."
+    echo "$@"
+    echo "Requires type of bag or any, got ${3}"
     exit 1;
   fi
 else
-  echo "Requires type of bag or any."
+  echo "Requires type of bag or any, got $@"
   exit 1;
 fi
 
-if [ ! -z "$4" ]
+if [ ! -z "${4}" ]
 then
-  MAILTO=$4
+  MAILTO="${4}"
 else
-  echo "Requires email address as argument"
+  echo "Requires email address as argument, got $@"
   exit 1;
 fi
 
@@ -48,22 +49,22 @@ fi
 #SYNCOPTS="--dryrun"
 SYNCOPTS=""
 
-BASENAME=`basename ${SOURCE}`
+BASENAME=`basename "${SOURCE}"`
 
 ME=`basename "$0"`
 
 # Make a lock file to prevent runs from overlapping
-FLOCK=/var/lock/${ME}_${BASENAME}.lock
+FLOCK="/var/lock/${ME}_${BASENAME}.lock"
  
 # Make a named pipe to hold the email contents.
 # We go to the trouble for cron compatibility
-PIPE=/tmp/${ME}_${BASENAME}.pipe
+PIPE="/tmp/${ME}_${BASENAME}.pipe"
 
 function finish {
   # Kill the pipe on exit
-  rm $PIPE
+  rm "${PIPE}"
   # Kill the lock on exit
-  rm $FLOCK
+  rm "${FLOCK}"
 }
 
 trap finish EXIT
@@ -75,13 +76,13 @@ trap finish EXIT
   BODY=''
   
   # Create the pipe on start
-  if [[ ! -p $PIPE ]]; then
-    mkfifo $PIPE
+  if [[ ! -p "${PIPE}" ]]; then
+    mkfifo "${PIPE}"
   fi
   
   # Attach a file descriptor.
   # This causes the shell to buffer the pipe so we avoid worries about blocking
-  exec 3<>$PIPE
+  exec 3<>"${PIPE}"
 
   # Get the time
   NOW=`date`
@@ -94,11 +95,11 @@ trap finish EXIT
   # If you were running this against bags, you might want this.  
   if [[ "$TYPE" == "bag" ]]; then
     ## Check for bagname/bagit.txt. If that exists, then validate the bag.
-    stat --format=%F:\ %n $SOURCE/bagit.txt >&3 2>&3 && bagit.py --validate $SOURCE 2>&3
+    stat --format='%F: %n' "${SOURCE}/bagit.txt" >&3 2>&3 && bagit.py --validate "${SOURCE}" 2>&3
     SOURCESTATUS="$?"
   # Is there something there?
   elif [[ "$TYPE" == "any" ]]; then
-    stat --format=%F:\ %n $SOURCE >&3 2>&3
+    stat --format='%F: %n' "${SOURCE}" >&3 2>&3
     SOURCESTATUS="$?"
   fi
 
@@ -120,7 +121,7 @@ trap finish EXIT
     echo "$BODY" | mail -s "s3sync source invalid: $BASENAME $NOW" $MAILCC $MAILTO
   else
     # If it is a valid bag, sync it.
-    SYNC=`aws s3 sync ${SYNCOPTS} ${SOURCE} ${DEST}`
+    SYNC=`aws s3 sync ${SYNCOPTS} "${SOURCE}" "${DEST}"`
     DEAD=false
 
     # Print the output to our pipe in a subshell
@@ -138,7 +139,6 @@ trap finish EXIT
 
     # Get the time
     NOW=`date`
-  
     echo "$BODY" | mail -s "s3sync: $BASENAME $NOW" $MAILCC $MAILTO
   fi
-) 200>$FLOCK
+) 200>"${FLOCK}"
