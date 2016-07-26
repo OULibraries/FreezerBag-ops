@@ -121,11 +121,11 @@ trap finish EXIT
     echo "$BODY" | mail -s "s3sync source invalid: $BASENAME $NOW" $MAILCC $MAILTO
   else
     # If it is a valid bag, sync it.
-    SYNC=`aws s3 sync ${SYNCOPTS} "${SOURCE}" "${DEST}"`
+    SYNC=`aws s3 sync ${SYNCOPTS} "${SOURCE}" "${DEST}" 2>&1`
     DEAD=false
 
     # Print the output to our pipe in a subshell
-    printf "${SYNC}\nEOF\n" >&3 2>&3 &
+    printf "${SYNC}\nEOF\n" >&3 &
 
     until $DEAD; do
       read -u 3 LINE || DEAD=true
